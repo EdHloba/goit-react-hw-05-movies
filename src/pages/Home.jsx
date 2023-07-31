@@ -1,31 +1,39 @@
-import { useState, useEffect } from 'react';
-import TrendMovies from 'components/TrendMovies';
-import MoviesAPIService from 'moviesAPI';
-
-const moviesAPI = new MoviesAPIService();
+import { useState, useEffect } from "react";
+import { fetchPopularMovies } from '../API';
+import { Notify } from "notiflix";
+import MoviesList from "components/MoviesList/MoviesList";
+import Loader from "components/Loader/Loader";
+import { Title } from "./Home.styled";
 
 const Home = () => {
-  const [movies, setMovies] = useState([]);
+    const [movies, setMovies] = useState([]);
+    const [error, setError] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    fetchTrends();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    useEffect(() => {
+        fetchTrendingMovies();
 
-  const fetchTrends = async () => {
-    try {
-      const data = await moviesAPI.getTrends();
-      setMovies(data.results);
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
-  return (
-    <>
-      <h2>Trending today</h2>
-      <TrendMovies movies={movies} />
-    </>
-  );
+        async function fetchTrendingMovies() {
+        setIsLoading(true);
+        try {
+            const responseMovies = await fetchPopularMovies();
+            setMovies(responseMovies);
+        } catch (error) {
+            setError(error);
+        } finally {
+        setIsLoading(false);
+        };
+        };
+    }, [])
+
+    return (
+        <main>
+            {error && Notify.failure(`${error.message}`)}
+            <Title>Trending today</Title>
+            {isLoading && <Loader />}
+            <MoviesList movies={movies} />
+        </main>
+    );
 };
 
 export default Home;

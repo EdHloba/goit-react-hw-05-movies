@@ -1,42 +1,52 @@
-import { Link, useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
+import { Navigate, useLocation, useParams } from "react-router-dom";
+// import { Notify } from "notiflix";
+import { fetchMovieDetails } from "API";
+import Loader from "components/Loader/Loader";
+import MovieCard from "components/MovieCard/MovieCard";
+import { BackLink } from "./MoviesDetails.styled";
 
-import MoviesAPIService from 'moviesAPI';
-import MoviePage from 'components/MoviePage';
 
-const moviesAPI = new MoviesAPIService();
+const MoviesDetails = () => {
+    const [movieDetails, setMovieDetails] = useState({});
+    const [error, setError] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
-const MovieDetails = () => {
-  const [details, setDetails] = useState({});
-  const { movieId } = useParams();
+    const { movieId } = useParams();
+    const location = useLocation();
+    const backLinkHref = useRef(location.state?.from ?? "/");
 
-  useEffect(() => {
-    const fetchDetails = async () => {
-      try {
-        const data = await moviesAPI.getMovieDetails(movieId);
-        setDetails(data);
-      } catch (error) {
-        console.log(error.massage);
-      }
-    };
+    useEffect(() => {
+        fetchhMoviesInfo();
+        async function fetchhMoviesInfo() {
+            setIsLoading(true);
+            try {
+                const responseMovie = await fetchMovieDetails(movieId);
 
-    fetchDetails();
-  }, [movieId]);
+                if (responseMovie.length === 0) {
+                    const error = new Error('Sorry, there is no info about movie you are searching for.')
+                    setError(error);
+                    return;
+                };
+                setMovieDetails(responseMovie);
+            } catch (error) {
+                console.log('error', error)
+                setError(error);
+            } finally {
+                setIsLoading(false);
+            };
+        };
+    }, [movieId]);
 
-  return (
-    <>
-      <MoviePage MovieDetails={details} />
-      <p>Additional information</p>
-      <ul>
-        <li>
-          <Link to="cast">Cast</Link>
-        </li>
-        <li>
-          <Link to="reviews">Reviews</Link>
-        </li>
-      </ul>
-    </>
-  );
+    return (
+        <>
+            {error && <Navigate to='/404'/>}
+            {/* {error && Notify.failure(`${error.message}`)} */}
+            <BackLink to={backLinkHref.current}>Back</BackLink>
+            {isLoading && <Loader />}
+            <MovieCard info={movieDetails} />
+        </>
+    );
 };
 
-export default MovieDetails;
+export default MoviesDetails;
