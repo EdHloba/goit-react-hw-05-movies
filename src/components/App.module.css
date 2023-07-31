@@ -1,0 +1,30 @@
+.Container {
+  min-width: 960px;
+  margin: 0;
+  padding: 0;
+}
+.Header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  margin-bottom: 16px;
+  border-bottom: 1px solid black;
+}
+
+.Navigation {
+  display: flex;
+}
+
+.Logo {
+  font-weight: 700;
+  margin: 0;
+}
+.Link {
+  padding: 8px 16px;
+  border-radius: 4px;
+  text-decoration: none;
+  color: black;
+  font-weight: 500;
+}
